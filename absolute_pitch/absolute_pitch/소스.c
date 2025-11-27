@@ -64,6 +64,8 @@ int main() {
 	float delay = 0;
 	char menuPick;
 	readFile(head);
+	system("mode con:cols=60 lines=28");
+
 	while (1) {
 		menuPrint();
 		FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
@@ -127,11 +129,21 @@ void menuPrint() {
 	printf("    └────────────────────────────────────────────────┘\n");
 }
 void sounding(float tc, float delay) {
-	float tone = pow(toner, tc);
-	int x = 32.7 * tone;
-	int tuning = (x - 20) / 38;
-	x = x + tuning;
-	Beep(x, delay);
+	//float tone = pow(toner, tc);
+	//int x = 32.7 * tone;
+	//int tuning = (x - 20) / 38;
+	//x = x + tuning;
+	//Beep(x, delay);
+
+	// GPT가 튜닝 다시 해 준 건데 잘 맞는진 모름	
+	int midi = 24 + tc;
+
+	double freq = 440.0 * pow(2.0, (midi - 69) / 12.0);
+
+	if (freq < 37) freq = 37;
+	if (freq > 32767) freq = 32767;
+
+	Beep((DWORD)(freq + 0.5), delay);
 }
 void rest(float delay) {
 	Sleep(delay);
@@ -635,7 +647,7 @@ void readFile(struct rank* header) {
 	if ((fpR = fopen("Player.txt", "r")) == NULL)return;
 	fscanf(fpR, "%d", &player);
 	fclose(fpR);
-	if ((fpR = fopen("GameRank.txt", "r", "rt,ccs=UTF-8")) == NULL)return;
+	if ((fpR = fopen("GameRank.txt", "r")) == NULL)return;
 	while (player != 0) {
 		fscanf(fpR, "%s %d\n", name, &score);
 		addList(header, score, name);
